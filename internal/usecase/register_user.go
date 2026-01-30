@@ -50,12 +50,9 @@ func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserInput) (Re
 		return RegisterUserOutput{}, err
 	}
 
-	entity, err := user.NewUser(id, name, email, time.Now().UTC())
-	if err != nil {
-		return RegisterUserOutput{}, err
-	}
+	entity := user.NewUser(id, name, email, time.Now().UTC())
 
-	if err := u.repo.Save(ctx, *entity); err != nil {
+	if err := u.repo.Save(ctx, entity); err != nil {
 		return RegisterUserOutput{}, err
 	}
 

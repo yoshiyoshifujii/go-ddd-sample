@@ -1,0 +1,12 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - domainctor
+  settings:
+    custom:
+      domainctor:
+        path: ./plugin/domainctor.so
+        description: Require NewXxx constructor returning value for exported domain structs in internal/domain.
+        original-url: local

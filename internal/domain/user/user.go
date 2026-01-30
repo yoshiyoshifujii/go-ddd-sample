@@ -18,19 +18,19 @@ type User struct {
 	createdAt time.Time
 }
 
-func NewUser(id UserID, name UserName, email Email, createdAt time.Time) (*User, error) {
+func NewUser(id UserID, name UserName, email Email, createdAt time.Time) User {
 	if id.IsZero() || name.IsZero() || email.IsZero() {
-		return nil, ErrInvalidUser
+		panic(ErrInvalidUser)
 	}
 	if createdAt.IsZero() {
-		return nil, ErrInvalidUserState
+		panic(ErrInvalidUserState)
 	}
-	return &User{
+	return User{
 		id:        id,
 		name:      name,
 		email:     email,
 		createdAt: createdAt,
-	}, nil
+	}
 }
 
 func (u *User) ID() UserID {

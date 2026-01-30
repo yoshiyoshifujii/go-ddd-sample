@@ -28,6 +28,12 @@ internal/
 
 ## 使い方
 
+### ツールのインストール
+
+```
+make tools
+```
+
 ### テスト
 
 ```
@@ -39,6 +45,15 @@ make test
 ```
 make fmt
 ```
+
+### Lint
+
+```
+make lint
+```
+
+`internal/domain/**` 配下の exported struct に対して、`NewXxx(...) Xxx` のコンストラクタがあることを検査します。
+`golangci-lint` が必要です。
 
 ### 静的解析
 
