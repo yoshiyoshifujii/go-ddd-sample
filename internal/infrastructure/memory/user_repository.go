@@ -5,23 +5,24 @@ import (
 	"sync"
 
 	"yoshiyoshifujii/go-ddd-sample/internal/domain/user"
+	"yoshiyoshifujii/go-ddd-sample/internal/repository"
 )
 
 // UserRepository is an in-memory implementation for tests or local usage.
 type UserRepository struct {
 	mu      sync.RWMutex
-	byID    map[user.UserID]*user.User
-	byEmail map[user.Email]*user.User
+	byID    map[user.UserID]user.User
+	byEmail map[user.Email]user.User
 }
 
 func NewUserRepository() *UserRepository {
 	return &UserRepository{
-		byID:    make(map[user.UserID]*user.User),
-		byEmail: make(map[user.Email]*user.User),
+		byID:    make(map[user.UserID]user.User),
+		byEmail: make(map[user.Email]user.User),
 	}
 }
 
-func (r *UserRepository) Save(ctx context.Context, entity *user.User) error {
+func (r *UserRepository) Save(ctx context.Context, entity user.User) error {
 	_ = ctx
 
 	r.mu.Lock()
@@ -32,7 +33,7 @@ func (r *UserRepository) Save(ctx context.Context, entity *user.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByID(ctx context.Context, id user.UserID) (*user.User, error) {
+func (r *UserRepository) FindByID(ctx context.Context, id user.UserID) (user.User, error) {
 	_ = ctx
 
 	r.mu.RLock()
@@ -40,12 +41,12 @@ func (r *UserRepository) FindByID(ctx context.Context, id user.UserID) (*user.Us
 
 	entity, ok := r.byID[id]
 	if !ok {
-		return nil, user.ErrUserNotFound
+		return user.User{}, repository.ErrUserNotFound
 	}
 	return entity, nil
 }
 
-func (r *UserRepository) FindByEmail(ctx context.Context, email user.Email) (*user.User, error) {
+func (r *UserRepository) FindByEmail(ctx context.Context, email user.Email) (user.User, error) {
 	_ = ctx
 
 	r.mu.RLock()
@@ -53,7 +54,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email user.Email) (*us
 
 	entity, ok := r.byEmail[email]
 	if !ok {
-		return nil, user.ErrUserNotFound
+		return user.User{}, repository.ErrUserNotFound
 	}
 	return entity, nil
 }

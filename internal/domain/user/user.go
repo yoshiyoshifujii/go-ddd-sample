@@ -49,10 +49,10 @@ func (u *User) CreatedAt() time.Time {
 	return u.createdAt
 }
 
-func (u *User) ChangeName(name UserName) error {
+func (u User) ChangeName(name UserName) (User, error) {
 	if name.IsZero() {
-		return ErrInvalidUser
+		return User{}, ErrInvalidUser
 	}
 	u.name = name
-	return nil
+	return u, nil
 }

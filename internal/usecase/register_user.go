@@ -6,16 +6,17 @@ import (
 	"time"
 
 	"yoshiyoshifujii/go-ddd-sample/internal/domain/user"
+	"yoshiyoshifujii/go-ddd-sample/internal/repository"
 )
 
 var ErrEmailAlreadyUsed = errors.New("email already used")
 
 // RegisterUser registers a new user.
 type RegisterUser struct {
-	repo user.UserRepository
+	repo repository.UserRepository
 }
 
-func NewRegisterUser(repo user.UserRepository) *RegisterUser {
+func NewRegisterUser(repo repository.UserRepository) *RegisterUser {
 	return &RegisterUser{repo: repo}
 }
 
@@ -38,9 +39,9 @@ func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserInput) (Re
 		return RegisterUserOutput{}, err
 	}
 
-	if existing, err := u.repo.FindByEmail(ctx, email); err == nil && existing != nil {
+	if _, err := u.repo.FindByEmail(ctx, email); err == nil {
 		return RegisterUserOutput{}, ErrEmailAlreadyUsed
-	} else if err != nil && !errors.Is(err, user.ErrUserNotFound) {
+	} else if err != nil && !errors.Is(err, repository.ErrUserNotFound) {
 		return RegisterUserOutput{}, err
 	}
 
@@ -54,7 +55,7 @@ func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserInput) (Re
 		return RegisterUserOutput{}, err
 	}
 
-	if err := u.repo.Save(ctx, entity); err != nil {
+	if err := u.repo.Save(ctx, *entity); err != nil {
 		return RegisterUserOutput{}, err
 	}
 

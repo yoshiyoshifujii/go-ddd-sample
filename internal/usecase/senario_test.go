@@ -2,34 +2,36 @@ package usecase_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"yoshiyoshifujii/go-ddd-sample/internal/infrastructure/memory"
 	"yoshiyoshifujii/go-ddd-sample/internal/usecase"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterUser(t *testing.T) {
+	// given
 	ctx := context.Background()
 	repo := memory.NewUserRepository()
-	uc := usecase.NewRegisterUser(repo)
 
-	out, err := uc.Execute(ctx, usecase.RegisterUserInput{
+	sut := usecase.NewRegisterUser(repo)
+
+	input := usecase.RegisterUserInput{
 		Name:  "Alice",
 		Email: "alice@example.com",
-	})
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	if out.UserID == "" {
-		t.Fatalf("expected user id")
 	}
 
-	_, err = uc.Execute(ctx, usecase.RegisterUserInput{
-		Name:  "Alice",
-		Email: "alice@example.com",
-	})
-	if !errors.Is(err, usecase.ErrEmailAlreadyUsed) {
-		t.Fatalf("expected ErrEmailAlreadyUsed, got %v", err)
-	}
+	// when
+	out, err := sut.Execute(ctx, input)
+
+	// then
+	assert.NoError(t, err)
+	assert.NotEmpty(t, out.UserID)
+
+	// when
+	_, err = sut.Execute(ctx, input)
+
+	// then
+	assert.ErrorIs(t, err, usecase.ErrEmailAlreadyUsed)
 }
