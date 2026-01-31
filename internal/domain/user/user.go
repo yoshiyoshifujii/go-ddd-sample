@@ -1,14 +1,6 @@
 package user
 
-import (
-	"errors"
-	"time"
-)
-
-var (
-	ErrInvalidUser      = errors.New("invalid user")
-	ErrInvalidUserState = errors.New("invalid user state")
-)
+import "time"
 
 // User is an entity with identity and invariants.
 type User struct {
@@ -20,10 +12,10 @@ type User struct {
 
 func NewUser(id UserID, name UserName, email Email, createdAt time.Time) User {
 	if id.IsZero() || name.IsZero() || email.IsZero() {
-		panic(ErrInvalidUser)
+		panic("invalid user")
 	}
 	if createdAt.IsZero() {
-		panic(ErrInvalidUserState)
+		panic("invalid user state")
 	}
 	return User{
 		id:        id,
@@ -47,12 +39,4 @@ func (u *User) Email() Email {
 
 func (u *User) CreatedAt() time.Time {
 	return u.createdAt
-}
-
-func (u User) ChangeName(name UserName) (User, error) {
-	if name.IsZero() {
-		return User{}, ErrInvalidUser
-	}
-	u.name = name
-	return u, nil
 }
