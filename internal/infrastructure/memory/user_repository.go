@@ -10,15 +10,13 @@ import (
 
 // UserRepository is an in-memory implementation for tests or local usage.
 type UserRepository struct {
-	mu      sync.RWMutex
-	byID    map[user.UserID]user.User
-	byEmail map[user.Email]user.User
+	mu   sync.RWMutex
+	byID map[user.UserID]user.User
 }
 
 func NewUserRepository() *UserRepository {
 	return &UserRepository{
-		byID:    make(map[user.UserID]user.User),
-		byEmail: make(map[user.Email]user.User),
+		byID: make(map[user.UserID]user.User),
 	}
 }
 
@@ -29,7 +27,6 @@ func (r *UserRepository) Save(ctx context.Context, entity user.User) error {
 	defer r.mu.Unlock()
 
 	r.byID[entity.ID()] = entity
-	r.byEmail[entity.Email()] = entity
 	return nil
 }
 
