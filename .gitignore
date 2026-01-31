@@ -1,2 +1,8 @@
 /plugin/*.so
 /bin/
+/.cache/
+/coverage/
+/dist/
+/tmp/
+/reports/
+*.log

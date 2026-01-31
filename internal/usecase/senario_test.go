@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"yoshiyoshifujii/go-ddd-sample/internal/domain/user"
 	"yoshiyoshifujii/go-ddd-sample/internal/infrastructure/memory"
 	"yoshiyoshifujii/go-ddd-sample/internal/usecase"
 
@@ -17,9 +18,9 @@ func TestRegisterUser(t *testing.T) {
 
 	sut := usecase.NewRegisterUser(repo)
 
-	input := usecase.RegisterUserInput{
-		Name:  "Alice",
-		Email: "alice@example.com",
+	input := usecase.RegisterUserUsecaseInput{
+		Name:  user.NewUserName("Alice"),
+		Email: user.NewEmail("alice@example.com"),
 	}
 
 	// when
@@ -27,6 +28,7 @@ func TestRegisterUser(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
+	assert.NotNil(t, out)
 	assert.NotEmpty(t, out.UserID)
 
 	// when

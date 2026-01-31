@@ -3,27 +3,24 @@ package user
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 )
-
-var ErrInvalidUserID = errors.New("invalid user id")
 
 // UserID is a value object.
 type UserID string
 
-func NewUserID() (UserID, error) {
-	var b [16]byte
-	if _, err := rand.Read(b[:]); err != nil {
-		return "", err
+func NewUserID(value string) UserID {
+	if value == "" {
+		panic("invalid user id")
 	}
-	return UserID(hex.EncodeToString(b[:])), nil
+	return UserID(value)
 }
 
-func UserIDFromString(value string) (UserID, error) {
-	if value == "" {
-		return "", ErrInvalidUserID
+func GenerateUserID() string {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(err)
 	}
-	return UserID(value), nil
+	return hex.EncodeToString(b[:])
 }
 
 func (id UserID) String() string {

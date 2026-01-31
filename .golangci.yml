@@ -8,5 +8,5 @@ linters:
     custom:
       domainctor:
         path: ./plugin/domainctor.so
-        description: Require NewXxx constructor returning value for exported domain structs in internal/domain.
+        description: Require NewXxx constructors for domain types and Execute signature for usecases.
         original-url: local

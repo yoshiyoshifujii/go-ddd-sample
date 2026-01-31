@@ -52,7 +52,7 @@ make fmt
 make lint
 ```
 
-`internal/domain/**` 配下の exported struct に対して、`NewXxx(...) Xxx` のコンストラクタがあることを検査します。
+`internal/domain/**` 配下の exported type に対して、`NewXxx(...) Xxx` または `NewXxx(...) (Xxx, error)` のコンストラクタがあることを検査します（interface は対象外）。
 `golangci-lint` が必要です。
 
 ### 静的解析

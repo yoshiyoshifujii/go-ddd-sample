@@ -1,25 +1,22 @@
 package user
 
 import (
-	"errors"
 	"net/mail"
 	"strings"
 )
 
-var ErrInvalidEmail = errors.New("invalid email")
-
 // Email is a value object.
 type Email string
 
-func EmailFromString(value string) (Email, error) {
+func NewEmail(value string) Email {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
-		return "", ErrInvalidEmail
+		panic("invalid email")
 	}
 	if _, err := mail.ParseAddress(trimmed); err != nil {
-		return "", ErrInvalidEmail
+		panic("invalid email")
 	}
-	return Email(strings.ToLower(trimmed)), nil
+	return Email(strings.ToLower(trimmed))
 }
 
 func (e Email) String() string {

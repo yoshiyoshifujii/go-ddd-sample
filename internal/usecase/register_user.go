@@ -20,41 +20,29 @@ func NewRegisterUser(repo repository.UserRepository) *RegisterUser {
 	return &RegisterUser{repo: repo}
 }
 
-type RegisterUserInput struct {
-	Name  string
-	Email string
+type RegisterUserUsecaseInput struct {
+	Name  user.UserName
+	Email user.Email
 }
 
-type RegisterUserOutput struct {
+type RegisterUserUsecaseOutput struct {
 	UserID string
 }
 
-func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserInput) (RegisterUserOutput, error) {
-	name, err := user.UserNameFromString(input.Name)
-	if err != nil {
-		return RegisterUserOutput{}, err
-	}
-	email, err := user.EmailFromString(input.Email)
-	if err != nil {
-		return RegisterUserOutput{}, err
-	}
-
-	if _, err := u.repo.FindByEmail(ctx, email); err == nil {
-		return RegisterUserOutput{}, ErrEmailAlreadyUsed
+func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserUsecaseInput) (*RegisterUserUsecaseOutput, error) {
+	if _, err := u.repo.FindByEmail(ctx, input.Email); err == nil {
+		return nil, ErrEmailAlreadyUsed
 	} else if err != nil && !errors.Is(err, repository.ErrUserNotFound) {
-		return RegisterUserOutput{}, err
+		return nil, err
 	}
 
-	id, err := user.NewUserID()
-	if err != nil {
-		return RegisterUserOutput{}, err
-	}
+	id := user.NewUserID(user.GenerateUserID())
 
-	entity := user.NewUser(id, name, email, time.Now().UTC())
+	entity := user.NewUser(id, input.Name, input.Email, time.Now().UTC())
 
 	if err := u.repo.Save(ctx, entity); err != nil {
-		return RegisterUserOutput{}, err
+		return nil, err
 	}
 
-	return RegisterUserOutput{UserID: id.String()}, nil
+	return &RegisterUserUsecaseOutput{UserID: id.String()}, nil
 }

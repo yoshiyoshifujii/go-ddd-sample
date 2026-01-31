@@ -2,8 +2,14 @@ GO ?= go
 GOFMT ?= gofmt
 GOLANGCI_LINT ?= ./bin/golangci-lint
 LINT_PLUGIN ?= plugin/domainctor.so
+CACHE_DIR ?= $(CURDIR)/.cache
+GOCACHE ?= $(CACHE_DIR)/go-build
+GOMODCACHE ?= $(CACHE_DIR)/go/pkg/mod
+GOPATH ?= $(CACHE_DIR)/go
+GOLANGCI_LINT_CACHE ?= $(CACHE_DIR)/golangci-lint
+GOENV ?= GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) GOPATH=$(GOPATH)
 
-.PHONY: test fmt lint vet tidy help lint-plugin tools
+.PHONY: test fmt lint vet tidy help lint-plugin tools cache
 
 help:
 	@echo "Targets:"
@@ -16,23 +22,30 @@ help:
 	@echo "  tools - install required tools into ./bin"
 
 fmt:
+	@mkdir -p $(GOCACHE) $(GOMODCACHE) $(GOPATH)
 	$(GOFMT) -w $(shell find internal -name '*.go')
 
 test:
-	$(GO) test ./...
+	@mkdir -p $(GOCACHE) $(GOMODCACHE) $(GOPATH)
+	$(GOENV) $(GO) test ./...
 
 vet:
-	$(GO) vet ./...
+	@mkdir -p $(GOCACHE) $(GOMODCACHE) $(GOPATH)
+	$(GOENV) $(GO) vet ./...
 
 tidy:
-	$(GO) mod tidy
+	@mkdir -p $(GOCACHE) $(GOMODCACHE) $(GOPATH)
+	$(GOENV) $(GO) mod tidy
 
-lint: lint-plugin
-	$(GOLANGCI_LINT) run ./...
+lint: cache lint-plugin
+	$(GOENV) GOLANGCI_LINT_CACHE=$(GOLANGCI_LINT_CACHE) $(GOLANGCI_LINT) run ./...
 
-lint-plugin:
-	$(GO) build -buildmode=plugin -o $(LINT_PLUGIN) ./plugin/domainctor.go
+lint-plugin: cache
+	$(GOENV) $(GO) build -buildmode=plugin -o $(LINT_PLUGIN) ./plugin/domainctor.go
+
+cache:
+	@mkdir -p $(GOCACHE) $(GOMODCACHE) $(GOPATH) $(GOLANGCI_LINT_CACHE)
 
 tools:
 	@mkdir -p ./bin
-	GOBIN=$(CURDIR)/bin $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0
+	$(GOENV) GOBIN=$(CURDIR)/bin $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0

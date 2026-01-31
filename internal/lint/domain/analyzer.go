@@ -13,7 +13,7 @@ const analyzerName = "domainctor"
 
 var Analyzer = &analysis.Analyzer{
 	Name: analyzerName,
-	Doc:  "require NewXxx constructor returning value for exported domain structs",
+	Doc:  "require NewXxx constructor taking at least one param and returning value for exported domain types",
 	Run:  run,
 }
 
@@ -22,7 +22,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		return nil, nil
 	}
 
-	exportedStructs := map[string]token.Pos{}
+	exportedTypes := map[string]token.Pos{}
 	constructors := map[string]bool{}
 
 	for _, file := range pass.Files {
@@ -43,15 +43,15 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				if !ast.IsExported(typeSpec.Name.Name) {
 					continue
 				}
-				if _, ok := typeSpec.Type.(*ast.StructType); !ok {
+				if isInterfaceType(typeSpec.Type) {
 					continue
 				}
-				exportedStructs[typeSpec.Name.Name] = typeSpec.Pos()
+				exportedTypes[typeSpec.Name.Name] = typeSpec.Pos()
 			}
 		}
 	}
 
-	if len(exportedStructs) == 0 {
+	if len(exportedTypes) == 0 {
 		return nil, nil
 	}
 
@@ -70,16 +70,16 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				continue
 			}
 			typeName := strings.TrimPrefix(name, "New")
-			if !hasValueReturn(fn, typeName) {
+			if !hasValueReturn(fn, typeName) || !hasParams(fn) {
 				continue
 			}
 			constructors[typeName] = true
 		}
 	}
 
-	for name, pos := range exportedStructs {
+	for name, pos := range exportedTypes {
 		if !constructors[name] {
-			pass.Reportf(pos, "exported struct %s must have constructor New%s returning %s", name, name, name)
+			pass.Reportf(pos, "exported type %s must have constructor New%s taking at least one param and returning %s", name, name, name)
 		}
 	}
 
@@ -108,13 +108,31 @@ func fileInDomain(pass *analysis.Pass, file *ast.File) bool {
 }
 
 func hasValueReturn(fn *ast.FuncDecl, typeName string) bool {
-	if fn.Type.Results == nil || len(fn.Type.Results.List) != 1 {
+	if fn.Type.Results == nil || len(fn.Type.Results.List) == 0 {
 		return false
 	}
-	result := fn.Type.Results.List[0].Type
-	ident, ok := result.(*ast.Ident)
+	if len(fn.Type.Results.List) == 1 {
+		return isIdentNamed(fn.Type.Results.List[0].Type, typeName)
+	}
+	return false
+}
+
+func hasParams(fn *ast.FuncDecl) bool {
+	if fn.Type.Params == nil {
+		return false
+	}
+	return len(fn.Type.Params.List) > 0
+}
+
+func isIdentNamed(t ast.Expr, name string) bool {
+	ident, ok := t.(*ast.Ident)
 	if !ok {
 		return false
 	}
-	return ident.Name == typeName
+	return ident.Name == name
+}
+
+func isInterfaceType(t ast.Expr) bool {
+	_, ok := t.(*ast.InterfaceType)
+	return ok
 }

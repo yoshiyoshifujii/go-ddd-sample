@@ -1,21 +1,16 @@
 package user
 
-import (
-	"errors"
-	"strings"
-)
-
-var ErrInvalidUserName = errors.New("invalid user name")
+import "strings"
 
 // UserName is a value object.
 type UserName string
 
-func UserNameFromString(value string) (UserName, error) {
+func NewUserName(value string) UserName {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" || len(trimmed) > 50 {
-		return "", ErrInvalidUserName
+		panic("invalid user name")
 	}
-	return UserName(trimmed), nil
+	return UserName(trimmed)
 }
 
 func (name UserName) String() string {
