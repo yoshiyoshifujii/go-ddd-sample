@@ -18,12 +18,16 @@ internal/
       user_id.go
       user_name.go
       email.go
-      repository.go
+  generator/
+    user_id_generator.go
+  repository/
+    user_repository.go
   usecase/
     register_user.go
   infrastructure/
     memory/
       user_repository.go
+      user_id_generator.go
 ```
 
 ## 使い方
@@ -65,7 +69,7 @@ make vet
 
 - ユーザー登録
   - Name / Email の Value Object でバリデーション
-  - 既存メールの重複チェック
+  - Email から安定した UserID を生成し、同一 Email なら同じ UserID を返す
 
 ## 今後の拡張アイデア
 
