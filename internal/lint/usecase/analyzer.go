@@ -23,7 +23,7 @@ type execState struct {
 	valid      bool
 }
 
-func run(pass *analysis.Pass) (interface{}, error) {
+func run(pass *analysis.Pass) (any, error) {
 	if !isUsecasePackage(pass) {
 		return nil, nil
 	}
