@@ -13,5 +13,4 @@ var ErrUserNotFound = errors.New("user not found")
 type UserRepository interface {
 	Save(ctx context.Context, user user.User) error
 	FindByID(ctx context.Context, id user.UserID) (user.User, error)
-	FindByEmail(ctx context.Context, email user.Email) (user.User, error)
 }

@@ -45,16 +45,3 @@ func (r *UserRepository) FindByID(ctx context.Context, id user.UserID) (user.Use
 	}
 	return entity, nil
 }
-
-func (r *UserRepository) FindByEmail(ctx context.Context, email user.Email) (user.User, error) {
-	_ = ctx
-
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	entity, ok := r.byEmail[email]
-	if !ok {
-		return user.User{}, repository.ErrUserNotFound
-	}
-	return entity, nil
-}

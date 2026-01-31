@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"yoshiyoshifujii/go-ddd-sample/internal/domain/user"
+	"yoshiyoshifujii/go-ddd-sample/internal/generator"
 	"yoshiyoshifujii/go-ddd-sample/internal/repository"
 )
 
-var ErrEmailAlreadyUsed = errors.New("email already used")
-
 // RegisterUser registers a new user.
 type RegisterUser struct {
-	repo repository.UserRepository
+	repo        repository.UserRepository
+	idGenerator generator.UserIDGenerator
 }
 
-func NewRegisterUser(repo repository.UserRepository) *RegisterUser {
-	return &RegisterUser{repo: repo}
+func NewRegisterUser(repo repository.UserRepository, idGenerator generator.UserIDGenerator) *RegisterUser {
+	return &RegisterUser{repo: repo, idGenerator: idGenerator}
 }
 
 type RegisterUserUsecaseInput struct {
@@ -30,15 +30,21 @@ type RegisterUserUsecaseOutput struct {
 }
 
 func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserUsecaseInput) (*RegisterUserUsecaseOutput, error) {
-	if _, err := u.repo.FindByEmail(ctx, input.Email); err == nil {
-		return nil, ErrEmailAlreadyUsed
-	} else if err != nil && !errors.Is(err, repository.ErrUserNotFound) {
+	id, err := u.idGenerator.Generate(ctx, input.Email)
+	if err != nil {
 		return nil, err
 	}
 
-	id := user.NewUserID(user.GenerateUserID())
+	entity, err := u.repo.FindByID(ctx, id)
+	if err != nil {
+		if !errors.Is(err, repository.ErrUserNotFound) {
+			return nil, err
+		}
+	} else {
+		return &RegisterUserUsecaseOutput{UserID: entity.ID().String()}, nil
+	}
 
-	entity := user.NewUser(id, input.Name, input.Email, time.Now().UTC())
+	entity = user.NewUser(id, input.Name, input.Email, time.Now().UTC())
 
 	if err := u.repo.Save(ctx, entity); err != nil {
 		return nil, err
