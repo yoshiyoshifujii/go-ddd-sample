@@ -48,4 +48,4 @@ cache:
 
 tools:
 	@mkdir -p ./bin
-	$(GOENV) GOBIN=$(CURDIR)/bin $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0
+	cd tools && $(GOENV) GOBIN=$(CURDIR)/bin $(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint
