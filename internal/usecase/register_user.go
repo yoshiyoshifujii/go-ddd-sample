@@ -36,11 +36,10 @@ func (u *RegisterUser) Execute(ctx context.Context, input RegisterUserUsecaseInp
 	}
 
 	entity, err := u.repo.FindByID(ctx, id)
-	if err != nil {
-		if !errors.Is(err, repository.ErrUserNotFound) {
-			return nil, err
-		}
-	} else {
+	if err != nil && !errors.Is(err, repository.ErrUserNotFound) {
+		return nil, err
+	}
+	if err == nil {
 		return &RegisterUserUsecaseOutput{UserID: entity.ID().String()}, nil
 	}
 
