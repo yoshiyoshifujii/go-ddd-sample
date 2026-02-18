@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"yoshiyoshifujii/go-ddd-sample/internal/domain/user"
-	"yoshiyoshifujii/go-ddd-sample/internal/infrastructure/memory"
+	"yoshiyoshifujii/go-ddd-sample/internal/adapter/memory"
 	"yoshiyoshifujii/go-ddd-sample/internal/usecase"
 
 	"github.com/stretchr/testify/assert"
